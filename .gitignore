@@ -1,0 +1,9 @@
+#ignore all .pyc
+*.pyc
+BlogBoy/blogboy.pem
+BlogBoy/BlogBoyEnv/
+.idea/*.*
+
+
+
+
