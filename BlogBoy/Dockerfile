@@ -12,4 +12,4 @@ RUN pip3 install -r requirements.txt
 COPY . /BlogBoy
 WORKDIR /
 
-CMD ["python", "BlogBoy/manage.py", "gunicorn"]
+CMD ["python", "manage.py", "gunicorn"]

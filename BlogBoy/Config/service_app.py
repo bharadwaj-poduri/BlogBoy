@@ -4,10 +4,12 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
+from Config.Settings import setup_config_logger
 
 
 app = Flask(__name__)
 
+setup_config_logger(app)
 api = Api(app)
 app.secret_key = "any random string"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
