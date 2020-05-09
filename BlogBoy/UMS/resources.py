@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 import json
+from Config.service_app import app
 from UMS.models import Users, RevokedTokenModel
 from flask import session
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
@@ -48,6 +49,7 @@ class UserLogin(Resource):
         if Users.verify_hash(data['password'], current_user.password):
             access_token = create_access_token(identity=data['username'])
             refresh_token = create_refresh_token(identity=data['username'])
+            app.logger.info("Logged in as {}".format(current_user.username))
             return {'message': 'Logged in as {}'.format(current_user.username),
                     'access_token': access_token,
                     'refresh_token': refresh_token
