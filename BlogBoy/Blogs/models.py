@@ -7,9 +7,9 @@ class Blogs(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
-    type = db.Column(db.String(100), nullable=True)
-    subject = db.Column(db.Text, nullable=True)
-    msg = db.Column(db.Text, nullable=True)
+    category = db.Column(db.String(100), nullable=True)
+    title = db.Column(db.Text, nullable=True)
+    body = db.Column(db.Text, nullable=True)
     created_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def save_to_db(self):
@@ -19,11 +19,19 @@ class Blogs(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
-    def serialize(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'subject': self.subject,
-            'type': self.type,
-            'msg': self.msg
+            'title': self.title,
+            'category': self.category,
+            'body': self.body
         }
+
+    @classmethod
+    def serialize(self, blogs):
+        final = []
+        for blog in blogs:
+            blog_object = Blogs(id=blog.id)
+            final.append(blog_object.to_dict())
+        return final

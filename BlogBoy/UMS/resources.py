@@ -103,9 +103,11 @@ class TokenRefresh(Resource):
 
 
 class AllUsers(Resource):
+    @jwt_required
     def get(self):
         return Users.return_all()
 
+    @jwt_required
     def delete(self):
         return Users.delete_all()
 
