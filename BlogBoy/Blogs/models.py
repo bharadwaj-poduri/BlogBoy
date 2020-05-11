@@ -1,6 +1,8 @@
 from Config.service_app import db
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from datetime import datetime
+from collections import defaultdict
+
 
 class Blogs(db.Model):
     __tablename__ = 'blogs'
@@ -11,6 +13,7 @@ class Blogs(db.Model):
     title = db.Column(db.Text, nullable=True)
     body = db.Column(db.Text, nullable=True)
     created_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     comments = db.Column(db.ARRAY(db.Integer), nullable=True)
     likes = db.Column(db.Integer, nullable=False, default=0)
 
@@ -22,15 +25,23 @@ class Blogs(db.Model):
         return '<id {}>'.format(self.id)
 
     def to_dict(self):
-        return {
+        blog = {
             'id': self.id,
             'user_id': self.user_id,
             'title': self.title,
             'category': self.category,
             'body': self.body,
             'likes': self.likes,
-            'created_on': self.created_on
+            'created_on': str(self.created_on),
+            'updated_on': str(self.updated_on),
+            'comments': self.comments
         }
+        comments = blog['comments'] if blog['comments'] else []
+        comment_map = defaultdict()
+        for comment_id in comments:
+            comment_map[comment_id] = Comments.get_comment(comment_id).to_dict()
+        blog['comments'] = comment_map
+        return blog
 
     @classmethod
     def serialize(cls, blogs):
@@ -54,6 +65,8 @@ class Comments(db.Model):
     comments = db.Column(db.ARRAY(db.Integer), nullable=True)
     likes = db.Column(db.Integer, nullable=False, default=0)
     parent = db.Column(db.Integer, nullable=False, default=-1)
+    created_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def save_to_db(self):
         db.session.add(self)
@@ -68,7 +81,10 @@ class Comments(db.Model):
             'user_id': self.user_id,
             'blog_id': self.blog_id,
             'likes': self.likes,
-            'body': self.body
+            'body': self.body,
+            'comments': self.comments,
+            'created_on': str(self.created_on),
+            'updated_on': str(self.updated_on)
         }
 
     @classmethod
