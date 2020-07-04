@@ -2,5 +2,6 @@
 *.pyc
 BlogBoy/blogboy.pem
 BlogBoy/BlogBoyEnv/
-BlogBoy/.idea/*.*
+.idea/*.*
 BlogBoy/logs/
+BlogBoy/.idea/*.*
