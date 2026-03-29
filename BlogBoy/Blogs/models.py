@@ -24,6 +24,12 @@ class Blogs(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
+    @property
+    def author_name(self):
+        from UMS.models import Users
+        user = Users.query.get(self.user_id)
+        return user.username if user else "Unknown"
+
     def to_dict(self):
         blog = {
             'id': self.id,
@@ -31,6 +37,7 @@ class Blogs(db.Model):
             'title': self.title,
             'category': self.category,
             'body': self.body,
+            'author': self.author_name,
             'likes': self.likes,
             'created_on': str(self.created_on),
             'updated_on': str(self.updated_on),

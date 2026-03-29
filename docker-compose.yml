@@ -2,6 +2,18 @@ version: '3'
 
 services:
 
+  frontend:
+    container_name: blogboy_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - BlogBoy
+    networks:
+      - apinetwork
+
   BlogBoy:
     container_name: BlogBoy
     image: blogboy
@@ -12,20 +24,29 @@ services:
       - apinetwork
     expose:
       - "5000"
-    ports:
-      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=blogboy
+      - DB_USER=postgres
+      - DB_PASS=hanu1729
 
-  nginx:
-    container_name: nginx
+  db:
+    container_name: blogboy_db
+    image: postgres:11
     restart: always
-    build: ./nginx
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=hanu1729
+      - POSTGRES_DB=blogboy
     networks:
       - apinetwork
-    expose:
-      - "8080"
-    ports:
-      - "80:8080"
-    tty: true
+    volumes:
+      - blogboy_db_data:/var/lib/postgresql/data
 
 networks:
   apinetwork:
+
+volumes:
+  blogboy_db_data:

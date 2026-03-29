@@ -4,7 +4,7 @@ from UMS.models import Users
 from BlogBoy.resources import BaseResource
 from Blogs.models import Blogs, Comments
 from flask import session
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm.attributes import flag_modified
 import json
 from Config.service_app import app, db
@@ -14,15 +14,18 @@ from collections import defaultdict
 class BlogResource(BaseResource):
     @jwt_required
     def post(self):
+        username = get_jwt_identity()
+        user = Users.find_by_username(username)
+        if not user:
+            return self.json_response(success=False, error_message='User not found', error_code=404)
+
         data = request.get_json()
         category = data.get("category")
         title = data.get("title")
         body = data.get("body")
-        if not session['user_id']:
-            return self.json_response(success=False, error_message='Need to login in order to create a blog', error_code=400)
 
         new_blog = Blogs(
-            user_id=session['user_id'],
+            user_id=user.id,
             title=title,
             category=category,
             body=body
@@ -35,13 +38,14 @@ class BlogResource(BaseResource):
         except Exception:
             return self.json_response(success=False, error_message='Something went wrong', error_code=500)
 
-    @jwt_required
     def get(self):
         category = request.args.get("category")
         id = request.args.get("id")
         user_id = request.args.get("user_id")
         title = request.args.get("title")
         data = None
+        if not (id or user_id or title or category):
+            data = Blogs.serialize(Blogs.query.all())
         if id:
             data = Blogs.get_blog(id).to_dict()
         if user_id:
@@ -54,6 +58,30 @@ class BlogResource(BaseResource):
             blogs = Blogs.query.filter(Blogs.category == category).all()
             data = Blogs.serialize(blogs)
         return self.json_response(success=True, error_code=200, data=data)
+
+    @jwt_required
+    def delete(self):
+        blog_id = request.args.get('id')
+        if not blog_id:
+            return self.json_response(success=False, error_message='Blog ID required', error_code=400)
+            
+        username = get_jwt_identity()
+        user = Users.find_by_username(username)
+        blog = Blogs.query.get(blog_id)
+        
+        if not blog:
+            return self.json_response(success=False, error_message='Blog not found', error_code=404)
+        
+        if blog.user_id != user.id:
+            return self.json_response(success=False, error_message='Not authorized to delete this blog', error_code=403)
+            
+        try:
+            db.session.delete(blog)
+            db.session.commit()
+            return self.json_response(success=True, error_code=200, data={'message': 'Blog deleted successfully'})
+        except Exception:
+            db.session.rollback()
+            return self.json_response(success=False, error_message='Something went wrong', error_code=500)
 
 
 class CommentResource(BaseResource):

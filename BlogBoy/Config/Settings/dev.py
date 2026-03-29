@@ -6,7 +6,11 @@ class Config(BaseConfig):
 
     # SQLAlchemy
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:hanu1729@localhost/blogboy'
+    DB_USER = os.environ.get('DB_USER', 'postgres')
+    DB_PASS = os.environ.get('DB_PASS', 'hanu1729')
+    DB_HOST = os.environ.get('DB_HOST', 'db') # Default to 'db' for Docker
+    DB_NAME = os.environ.get('DB_NAME', 'blogboy')
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}/{}'.format(DB_USER, DB_PASS, DB_HOST, DB_NAME)
     SQLALCHEMY_POOL_RECYCLE = 100
 
     JWT_SECRET_KEY = 'jwt-secret-string'

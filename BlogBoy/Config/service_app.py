@@ -7,7 +7,9 @@ from sqlalchemy import create_engine
 from Config.Settings import setup_config_logger
 
 
+from datetime import timedelta
 app = Flask(__name__)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 
 setup_config_logger(app)
 api = Api(app)
@@ -21,6 +23,11 @@ from UMS.url_defs import *
 from UMS.models import *
 from Blogs.models import *
 from Blogs.url_defs import *
+
+
+@app.route('/')
+def home():
+    return {"message": "BlogBoy API is running"}, 200
 
 
 @jwt.token_in_blacklist_loader

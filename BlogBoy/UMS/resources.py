@@ -62,7 +62,7 @@ class UserLogin(BaseResource):
             return self.json_response(success=False, error_message='Wrong credentials', error_code=400)
 
 
-class UserLogoutAccess(Resource):
+class UserLogoutAccess(BaseResource):
     @jwt_required
     def post(self):
         jti = get_raw_jwt()['jti']
